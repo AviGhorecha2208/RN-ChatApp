@@ -17,7 +17,7 @@ LogBox.ignoreAllLogs();
 const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar animated={true} backgroundColor={Colors.white} barStyle={'dark-content'} />
+      <StatusBar animated={true} backgroundColor={Colors.black} barStyle={'light-content'} />
       <SafeAreaView style={styles.container}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>

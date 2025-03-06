@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     height: heightPx(105),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.overlay50,
+    backgroundColor: Colors.overlayBlack60,
   },
   innerContainer: {
     width: moderateScale(80),

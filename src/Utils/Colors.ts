@@ -24,7 +24,7 @@ export const Colors = {
   background: '#000000', // True black background for OLED efficiency
   surface: '#0D0D0D', // Very dark gray for subtle contrast
   cardBackground: '#121212',
-  borderColor: '#1A1A1A',
+  borderColor: '#2A2A2A',
 
   // Text colors
   textPrimary: '#EAEAEA', // Soft white for smooth readability

@@ -38,19 +38,19 @@ const CommonButton = ({
   leftIcon,
   leftIconStyle,
 }: CommonButtonProps) => {
-  const scale = useSharedValue(1);
+  const animatedScale = useSharedValue(1);
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95);
+    animatedScale.value = withSpring(0.95);
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1);
+    animatedScale.value = withSpring(1);
   };
 
   const rStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: scale.value }],
+      transform: [{ scale: animatedScale.value }],
     };
   });
 
@@ -67,7 +67,7 @@ const CommonButton = ({
         {isLoading ? (
           <ActivityIndicator size={'small'} color={Colors.white} />
         ) : (
-          <Text style={[CommonStylesFn.text(4, Colors.black, Fonts.medium), textStyle]}>
+          <Text style={[CommonStylesFn.text(4, Colors.white, Fonts.medium), textStyle]}>
             {label}
           </Text>
         )}
@@ -81,10 +81,11 @@ export default CommonButton;
 const styles = StyleSheet.create({
   container: {
     height: verticalScale(40),
+    paddingVertical: verticalScale(10),
     borderRadius: moderateScale(10),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
   },
   leftIcon: {
     width: moderateScale(20),

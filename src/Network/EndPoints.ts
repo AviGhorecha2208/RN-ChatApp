@@ -1,1 +1,3 @@
-export const EndPoints = {};
+export const EndPoints = {
+  registerUser: '/chat/username',
+};

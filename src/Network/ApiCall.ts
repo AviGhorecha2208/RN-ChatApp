@@ -1,6 +1,6 @@
-import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { AppConfig } from './AppConfig';
-import { getAccessToken } from '../Utils/Getters';
+import Loader from '../Utils/AppLoader';
 
 const axiosInstance = Axios.create({
   baseURL: AppConfig.baseUrl,
@@ -8,8 +8,6 @@ const axiosInstance = Axios.create({
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const accessToken = getAccessToken();
-    config.headers.set('Authorization', `Bearer ${accessToken}`);
     console.log(`axios request : ${config?.url} =>`, config);
     return config;
   },
@@ -20,10 +18,12 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   async (response) => {
+    Loader.isLoading(false);
     console.log(`<= Response : ${response?.config?.url} : Status - ${response?.status} `, response);
     return response;
   },
   async (error) => {
+    Loader.isLoading(false);
     console.log(`<= Response Error : ${error?.config?.url} : Status - ${error?.status} `, error);
     return Promise.reject(error);
   },
@@ -33,11 +33,6 @@ export interface APICallParams {
   method?: 'get' | 'post' | 'put' | 'delete';
   payload?: any;
   url: string;
-  headers?: AxiosRequestHeaders;
-  formData?: boolean;
-  removeLoader?: boolean;
-  removeToken?: boolean;
-  updatedToken?: string;
 }
 
 const APICall = async <T>({
@@ -45,6 +40,7 @@ const APICall = async <T>({
   payload = null,
   url = '',
 }: APICallParams): Promise<AxiosResponse<T>> => {
+  Loader.isLoading(true);
   const config: AxiosRequestConfig = {
     method: method.toLowerCase(),
     timeout: 1000 * 60 * 2,

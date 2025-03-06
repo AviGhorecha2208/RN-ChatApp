@@ -18,3 +18,10 @@ export type ErrorWithMessage = {
   message: string;
   error?: string;
 };
+
+export interface RegisterUserResponse {
+  username: string;
+  id: number | null;
+  created_at: string;
+  expires_at: string;
+}
