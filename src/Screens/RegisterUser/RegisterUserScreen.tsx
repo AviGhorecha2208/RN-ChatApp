@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../Utils/Colors';
 import CommonButton from '../../Components/CommonButton';
 import { moderateScale, scale, verticalScale, widthPx } from '../../Utils/Responsive';
@@ -26,46 +25,37 @@ const RegisterUserScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <View style={styles.formContainer}>
-          <View style={styles.card}>
-            <View style={styles.headerContainer}>
-              <Text style={CommonStylesFn.text(4, Colors.white, Fonts.bold)}>{'Welcome to'}</Text>
-              <Text style={CommonStylesFn.text(12, Colors.primary, Fonts.bold)}>{'Chat App'}</Text>
-              <Text style={CommonStylesFn.text(3.5, Colors.white, Fonts.regular)}>
-                {'Enter your username to start chatting'}
-              </Text>
-            </View>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder={'Enter username'}
-                placeholderTextColor={Colors.textMuted}
-                value={username}
-                onChangeText={(text) => {
-                  setUsername(text);
-                  setError('');
-                }}
-                autoCapitalize={'none'}
-                autoCorrect={false}
-              />
-              {error ? (
-                <Text
-                  style={[CommonStylesFn.text(3, Colors.error, Fonts.regular), styles.errorText]}
-                >
-                  {error}
-                </Text>
-              ) : null}
-            </View>
-            <CommonButton label={'Get Started'} onPress={handleSubmit} />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.formContainer}>
+        <View style={styles.card}>
+          <View style={styles.headerContainer}>
+            <Text style={CommonStylesFn.text(4, Colors.white, Fonts.bold)}>{'Welcome to'}</Text>
+            <Text style={CommonStylesFn.text(12, Colors.primary, Fonts.bold)}>{'Chat App'}</Text>
           </View>
+          <TextInput
+            style={styles.input}
+            placeholder={'Enter username'}
+            placeholderTextColor={Colors.textMuted}
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+              setError('');
+            }}
+            autoCapitalize={'none'}
+            autoCorrect={false}
+          />
+          {error ? (
+            <Text style={[CommonStylesFn.text(3, Colors.error, Fonts.regular), styles.errorText]}>
+              {error}
+            </Text>
+          ) : null}
+          <CommonButton label={'Get Started'} onPress={handleSubmit} />
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -87,23 +77,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(20),
   },
-  appTitle: {
-    marginBottom: verticalScale(10),
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  subtitle: {
-    opacity: 0.8,
-  },
   card: {
     width: widthPx(85),
     backgroundColor: Colors.cardBackground,
     borderRadius: moderateScale(16),
     paddingHorizontal: scale(24),
     paddingVertical: verticalScale(24),
-  },
-  inputContainer: {
-    marginBottom: verticalScale(24),
   },
   label: {
     marginBottom: verticalScale(8),
@@ -114,7 +93,7 @@ const styles = StyleSheet.create({
     borderWidth: moderateScale(1),
     borderColor: Colors.borderColor,
     borderRadius: moderateScale(12),
-    marginTop: verticalScale(20),
+    marginVertical: verticalScale(20),
 
     paddingHorizontal: scale(16),
     paddingVertical: verticalScale(16),

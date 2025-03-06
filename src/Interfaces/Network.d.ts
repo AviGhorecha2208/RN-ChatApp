@@ -25,3 +25,10 @@ export interface RegisterUserResponse {
   created_at: string;
   expires_at: string;
 }
+
+export interface Room {
+  id: number;
+  name: string;
+  created_at: string;
+  expires_at: string;
+}

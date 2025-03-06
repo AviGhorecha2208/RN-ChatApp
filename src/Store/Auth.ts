@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RegisterUserResponse } from '../Interfaces/Network';
+import { revertAll } from '../Store/RevertAll';
 
 const initialState: {
   userData: RegisterUserResponse;
@@ -15,6 +16,10 @@ const initialState: {
 export const authSlice = createSlice({
   name: 'Auth',
   initialState,
+  extraReducers: (builder) =>
+    builder.addCase(revertAll, () => {
+      return initialState;
+    }),
   reducers: {
     updateUserData: (state, action: PayloadAction<RegisterUserResponse>) => {
       state.userData = action.payload;

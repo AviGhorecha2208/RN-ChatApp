@@ -1,4 +1,4 @@
-import { LogBox, SafeAreaView, StyleSheet, StatusBar } from 'react-native';
+import { LogBox, StyleSheet, StatusBar } from 'react-native';
 import React from 'react';
 import { Colors } from './src/Utils/Colors';
 
@@ -11,13 +11,14 @@ import Toast from 'react-native-toast-message';
 import { Utility } from './src/Utils/Utility';
 import AppLoader from './src/Components/Loader';
 import Loader from './src/Utils/AppLoader';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 LogBox.ignoreAllLogs();
 
 const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar animated={true} backgroundColor={Colors.black} barStyle={'light-content'} />
+      <StatusBar animated={true} backgroundColor={Colors.accent} barStyle={'light-content'} />
       <SafeAreaView style={styles.container}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
@@ -36,6 +37,6 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.black,
   },
 });

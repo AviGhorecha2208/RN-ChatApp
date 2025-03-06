@@ -2,6 +2,7 @@ enum Screens {
   StartupScreen = 'StartupScreen',
   Dashboard = 'Dashboard',
   RegisterUser = 'RegisterUser',
+  CreateRoom = 'CreateRoom',
 }
 
 enum ToastType {

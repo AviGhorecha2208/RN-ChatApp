@@ -1,5 +1,6 @@
 import { RegisterUserResponse } from '../Interfaces/Network';
 import { navigationRef } from '../Navigation/Navigation';
+import { replace } from '../Navigation/NavigationServices';
 import APICall from '../Network/ApiCall';
 import { EndPoints } from '../Network/EndPoints';
 import { updateUserData } from '../Store/Auth';
@@ -17,7 +18,7 @@ const handleRegisterUser = async (username: string) => {
     if (response?.status === 200) {
       store.dispatch(updateUserData(response.data));
       showToast(ToastType.success, 'Register/Login Successfully');
-      navigationRef.navigate(Screens.Dashboard);
+      replace(Screens.Dashboard);
     } else {
       showToast(ToastType.error, 'Failed to register. Please try again.');
     }
