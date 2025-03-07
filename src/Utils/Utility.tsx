@@ -6,7 +6,10 @@ import { CommonStylesFn } from './CommonStyles';
 import { Platform } from 'react-native';
 import { ErrorWithMessage } from '../Interfaces/Network';
 import moment from 'moment';
-import { ToastType } from './Const';
+import { Screens, ToastType } from './Const';
+import { reset } from '../Navigation/NavigationServices';
+import { store } from '../Store/Store';
+import { revertAll } from '../Store/RevertAll';
 
 export const toastConfig = {
   success: (props: BaseToastProps) => (
@@ -130,6 +133,14 @@ const formatCurrency = (amount: string): string => {
   }).format(numAmount);
 };
 
+const logout = () => {
+  reset({
+    index: 0,
+    routes: [{ name: Screens.RegisterUser }],
+  });
+  store.dispatch(revertAll());
+};
+
 export const Utility = {
   toastConfig,
   showToast,
@@ -139,4 +150,5 @@ export const Utility = {
   formatCurrency,
   isEmailValid,
   isPhoneNumberValid,
+  logout,
 };

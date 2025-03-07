@@ -1,8 +1,7 @@
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import React from 'react';
 import ReactNativeModal from 'react-native-modal';
 import CommonButton from '../CommonButton';
-import SubTitle from '../SubTitle';
 import { Colors } from '../../Utils/Colors';
 import { SCREEN_HEIGHT, moderateScale, scale, verticalScale } from '../../Utils/Responsive';
 import { CommonStylesFn } from '../../Utils/CommonStyles';
@@ -58,10 +57,8 @@ const ConfirmationModal = ({
       deviceHeight={SCREEN_HEIGHT}
     >
       <View style={styles.modalChildContainer}>
-        {title && (
-          <SubTitle label={title} containerStyle={styles.titleContainer} textStyle={styles.title} />
-        )}
-        {subTitle && <SubTitle label={subTitle} containerStyle={styles.subTitleContainer} />}
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subTitle}>{subTitle}</Text>
         <View style={styles.buttonContainer}>
           <CommonButton
             label={negativeLabel ?? 'Cancel'}
@@ -91,21 +88,25 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   modalChildContainer: {
-    backgroundColor: Colors.white,
-    marginHorizontal: scale(10),
-    paddingHorizontal: scale(10),
+    backgroundColor: Colors.surface,
+    marginHorizontal: scale(16),
+    paddingHorizontal: scale(16),
     borderRadius: moderateScale(10),
     paddingVertical: verticalScale(10),
     borderWidth: moderateScale(1),
     borderColor: Colors.borderColor,
   },
   title: {
-    ...CommonStylesFn.text(4, Colors.textPrimary, Fonts.medium),
+    ...CommonStylesFn.text(4.5, Colors.textPrimary, Fonts.medium),
+    marginBottom: verticalScale(10),
+    paddingBottom: verticalScale(10),
+    borderBottomWidth: moderateScale(1),
+    borderColor: Colors.borderColor,
   },
   subTitle: {
     ...CommonStylesFn.text(3.75, Colors.textPrimary, Fonts.regular),
     marginVertical: verticalScale(10),
-    marginBottom: verticalScale(50),
+    marginBottom: verticalScale(20),
   },
   titleContainer: {
     paddingVertical: verticalScale(10),
@@ -120,6 +121,9 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     marginVertical: verticalScale(10),
+    backgroundColor: Colors.background,
+    borderWidth: moderateScale(1),
+    borderColor: Colors.primary,
   },
   button: {
     flex: 1,

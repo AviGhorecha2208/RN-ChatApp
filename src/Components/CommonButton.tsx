@@ -81,7 +81,6 @@ export default CommonButton;
 const styles = StyleSheet.create({
   container: {
     height: verticalScale(40),
-    paddingVertical: verticalScale(10),
     borderRadius: moderateScale(10),
     alignItems: 'center',
     justifyContent: 'center',

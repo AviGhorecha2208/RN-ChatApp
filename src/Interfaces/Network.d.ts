@@ -31,4 +31,12 @@ export interface Room {
   name: string;
   created_at: string;
   expires_at: string;
+  is_active?: boolean;
+}
+
+export interface StatsResponse {
+  total_rooms: number;
+  total_users: number;
+  active_rooms: Room[];
+  active_users: string[];
 }
