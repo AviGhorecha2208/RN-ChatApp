@@ -40,3 +40,21 @@ export interface StatsResponse {
   active_rooms: Room[];
   active_users: string[];
 }
+
+export interface Message {
+  content: string;
+  created_at: string;
+  id: number;
+  room_id: string;
+  user_id: number | string;
+  username: string;
+}
+
+export interface MessageEvent {
+  content: string;
+  created_at: string;
+  id: number;
+  room_id: string;
+  user_id: number | string;
+  username: string;
+}

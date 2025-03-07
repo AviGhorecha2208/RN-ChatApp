@@ -31,6 +31,7 @@ export const createRoom = async (name: string) => {
   if (response.status === 200) {
     showToast(ToastType.success, 'Room created successfully');
     await getRooms();
+    await getStats();
     return response.data;
   } else {
     showToast(ToastType.error, 'Error creating room');

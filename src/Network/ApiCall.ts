@@ -1,4 +1,5 @@
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+/* eslint-disable no-unsafe-finally */
+import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { AppConfig } from './AppConfig';
 import Loader from '../Utils/AppLoader';
 
@@ -18,14 +19,20 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   async (response) => {
-    Loader.isLoading(false);
     console.log(`<= Response : ${response?.config?.url} : Status - ${response?.status} `, response);
+    Loader.isLoading(false);
     return response;
   },
   async (error) => {
-    Loader.isLoading(false);
-    console.log(`<= Response Error : ${error?.config?.url} : Status - ${error?.status} `, error);
-    return Promise.reject(error);
+    try {
+      console.log(`<= Response : ${error?.config?.url} : Status - ${error?.status} `, error);
+      return Promise.reject(error);
+    } catch (err) {
+      console.log('Error in axios interceptor response: ', err);
+      return Promise.reject(err);
+    } finally {
+      Loader.isLoading(false);
+    }
   },
 );
 
@@ -33,14 +40,21 @@ export interface APICallParams {
   method?: 'get' | 'post' | 'put' | 'delete';
   payload?: any;
   url: string;
+  headers?: AxiosRequestHeaders;
+  removeLoader?: boolean;
 }
 
 const APICall = async <T>({
   method = 'post',
   payload = null,
   url = '',
+  headers = {} as AxiosRequestHeaders,
+  removeLoader = false,
 }: APICallParams): Promise<AxiosResponse<T>> => {
-  Loader.isLoading(true);
+  if (!removeLoader) {
+    Loader.isLoading(true);
+  }
+
   const config: AxiosRequestConfig = {
     method: method.toLowerCase(),
     timeout: 1000 * 60 * 2,
@@ -55,6 +69,7 @@ const APICall = async <T>({
   } else if (payload && method.toLowerCase() === 'post') {
     config.data = payload;
   }
+  console.log('API details: ', method, payload, url);
 
   return new Promise((resolve, reject) => {
     axiosInstance(config)
@@ -63,15 +78,6 @@ const APICall = async <T>({
       })
       .catch((error) => {
         if (error.response) {
-          if (error.response.data?.error) {
-            reject({
-              statusCode: error.response,
-              data: {
-                ...error.response.data,
-                message: error?.response?.data?.error,
-              },
-            });
-          }
           reject(error);
         }
         reject({
