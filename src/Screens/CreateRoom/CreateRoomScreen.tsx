@@ -23,7 +23,11 @@ const CreateRoomScreen = () => {
       return;
     }
     setError('');
-    await createRoom(roomName);
+    const room = await createRoom(roomName);
+    console.log(room, 'room');
+    if (room) {
+      pop();
+    }
   };
 
   return (

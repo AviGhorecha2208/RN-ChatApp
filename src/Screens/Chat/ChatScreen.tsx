@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Keyboard,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Colors } from '../../Utils/Colors';
 import CommonHeader from '../../Components/CommonHeader';
 import IconContainer from '../../Components/IconContainer';
@@ -54,18 +54,22 @@ const ChatScreen = () => {
     messages: socketMessages,
     sendMessage,
     disconnect,
+    reconnect,
   } = useSocket(room.id, username);
 
-  useEffect(() => {
-    const fetchPreviousMessages = async () => {
-      const messages = await getPreviousMessages(room.id);
-      if (messages) {
-        console.log(messages, 'messages');
-        setLocalMessages(messages);
-      }
-    };
-    fetchPreviousMessages();
+  const fetchPreviousMessages = useCallback(async () => {
+    const messages = await getPreviousMessages(room.id);
+    if (messages) {
+      console.log(messages, 'messages');
+      setLocalMessages(messages);
+    }
   }, [room.id]);
+
+  useEffect(() => {
+    fetchPreviousMessages();
+  }, [fetchPreviousMessages]);
+
+  console.log(socketMessages, 'socketMessages');
 
   useEffect(() => {
     if (socketMessages.length > 0) {
@@ -73,10 +77,12 @@ const ChatScreen = () => {
     }
   }, [socketMessages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const messageToSend = message.trim();
     if (messageToSend && isConnected) {
-      sendMessage(messageToSend);
+      const x = sendMessage(messageToSend);
+      console.log(x, 'x');
+
       setMessage('');
     } else if (!messageToSend) {
       showToast(ToastType.error, 'Please enter a message');
@@ -110,7 +116,13 @@ const ChatScreen = () => {
         isKeyboardVisible ? (Platform.OS === 'ios' ? verticalScale(100) : verticalScale(60)) : 0
       }
     >
-      <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
+      <CommonHeader
+        title={room.name}
+        leftIcon={'arrow-left'}
+        onLeftPress={handleLeftPress}
+        rightIcon={'refresh'}
+        onRightPress={reconnect}
+      />
 
       <FlatList
         data={localMessages}

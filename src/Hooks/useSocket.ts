@@ -40,31 +40,42 @@ export const useSocket = (roomId: number, username: string) => {
     try {
       console.log('WebSocket connection established');
       socketRef.onopen = () => {
-        console.log('Socket connected successfully');
-        setIsConnected(true);
-        reconnectAttemptsRef.current = 0;
-        isIntentionalDisconnectRef.current = false;
-      };
-
-      socketRef.onclose = () => {
-        console.log('Socket disconnected:');
-        try {
-          if (
-            !isIntentionalDisconnectRef.current &&
-            reconnectAttemptsRef.current < maxReconnectAttempts
-          ) {
-            reconnectAttemptsRef.current++;
-            const delay = 10000;
-            console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
-            reconnectTimeoutRef.current = setTimeout(connect, delay);
-          } else if (isIntentionalDisconnectRef.current) {
-            console.log('Intentional disconnect detected, skipping reconnect');
-          } else {
-            console.log('Max reconnect attempts reached, stopping');
+        return new Promise((resolve, reject) => {
+          try {
+            console.log('Socket connected successfully');
+            setIsConnected(true);
+            reconnectAttemptsRef.current = 0;
+            isIntentionalDisconnectRef.current = false;
+            resolve(true);
+          } catch (error) {
+            console.log('Error connecting to WebSocket:', error);
+            reject(error);
           }
-        } catch (error) {
-          console.log('Error setting isConnected to false:', error);
-        }
+        });
+      };
+      socketRef.onclose = () => {
+        return new Promise((resolve, reject) => {
+          console.log('Socket disconnected:');
+          try {
+            if (
+              !isIntentionalDisconnectRef.current &&
+              reconnectAttemptsRef.current < maxReconnectAttempts
+            ) {
+              reconnectAttemptsRef.current++;
+              const delay = 10000;
+              console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+              reconnectTimeoutRef.current = setTimeout(connect, delay);
+            } else if (isIntentionalDisconnectRef.current) {
+              console.log('Intentional disconnect detected, skipping reconnect');
+            } else {
+              console.log('Max reconnect attempts reached, stopping');
+            }
+            resolve(true);
+          } catch (error) {
+            console.log('Error setting isConnected to false:', error);
+            reject(error);
+          }
+        });
       };
 
       socketRef.onerror = () => {
@@ -73,27 +84,36 @@ export const useSocket = (roomId: number, username: string) => {
       };
 
       socketRef.onmessage = (event) => {
-        try {
-          const data = event.data;
-          console.log('Received message:', data);
+        return new Promise((resolve, reject) => {
+          try {
+            const data = event.data;
+            console.log('Received message:', data);
 
-          if (data.event === 'pong') {
-            console.log('Received pong from server');
-            return;
-          }
+            if (data.event === 'ping') {
+              console.log('Received ping from server');
+              return;
+            }
 
-          if (data.event === 'message') {
-            setMessages((prev) => {
-              if (prev.some((msg) => msg.id === data.message.id)) {
-                return prev;
-              }
-              return [...prev, data.message];
-            });
+            if (data.event === 'message') {
+              setMessages((prev) => {
+                if (prev.some((msg) => msg.id === data.message.id)) {
+                  return prev;
+                }
+                return [...prev, data.message];
+              });
+            }
+
+            resolve(data);
+          } catch (error) {
+            console.error('Error parsing message:', error);
+            reject(error);
           }
-        } catch (error) {
-          console.error('Error parsing message:', error);
-        }
+        });
       };
+
+      // socketRef.addEventListener('message', (event) => {
+      //   console.log('Received message:', event.data);
+      // });
     } catch (error) {
       console.log('Failed to establish WebSocket connection:', error);
       setIsConnected(false);
@@ -103,20 +123,24 @@ export const useSocket = (roomId: number, username: string) => {
   const disconnect = useCallback(() => {
     console.log('Disconnecting WebSocket');
     isIntentionalDisconnectRef.current = true;
-    try {
-      if (socketRef) {
-        socketRef.close();
+    return new Promise((resolve, reject) => {
+      try {
+        if (socketRef) {
+          socketRef.close();
+        }
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = null;
+        }
+        setIsConnected(false);
+        setMessages([]);
+        reconnectAttemptsRef.current = 0;
+        resolve(true);
+      } catch (error) {
+        console.log('Error closing WebSocket:', error);
+        reject(error);
       }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-      setIsConnected(false);
-      setMessages([]);
-      reconnectAttemptsRef.current = 0;
-    } catch (error) {
-      console.log('Error closing WebSocket:', error);
-    }
+    });
   }, [roomId, username]);
 
   const sendMessage = (text: string) => {
@@ -142,11 +166,18 @@ export const useSocket = (roomId: number, username: string) => {
     }
   };
 
+  const reconnect = useCallback(() => {
+    console.log('reconnecting');
+    disconnect().then(() => {
+      connect();
+    });
+  }, [roomId, username]);
+
   return {
     isConnected,
-    connect,
     messages,
     sendMessage,
     disconnect,
+    reconnect,
   };
 };

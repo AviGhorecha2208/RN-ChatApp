@@ -14,6 +14,7 @@ import { Fonts } from '../../Utils/Fonts';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utility } from '../../Utils/Utility';
 import ConfirmationModal from '../../Components/Modals/ConfirmationModal';
+import EmptyComponent from '../../Components/EmptyComponent';
 
 const DashboardScreen = () => {
   const { username } = useSelector((state: RootState) => state.Auth.userData);
@@ -31,6 +32,7 @@ const DashboardScreen = () => {
 
   useEffect(() => {
     setSearchedRooms(rooms);
+    setSearchText('');
   }, [rooms]);
 
   const handleCreateRoom = () => {
@@ -39,8 +41,8 @@ const DashboardScreen = () => {
 
   const handleRefresh = async () => {
     try {
-      await getStats();
       await getRooms();
+      await getStats();
     } catch (error) {
       console.log(error, 'handleRefresh error');
     }
@@ -94,6 +96,7 @@ const DashboardScreen = () => {
           contentContainerStyle={styles.flContent}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={false} onRefresh={handleRefresh} />}
+          ListEmptyComponent={EmptyComponent}
         />
       </View>
       <ConfirmationModal

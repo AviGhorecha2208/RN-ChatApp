@@ -35,7 +35,9 @@ const RoomItem = ({ room, index }: RoomItemProps) => {
           <Text style={CommonStylesFn.text(4, Colors.white, Fonts.bold)}>{index + 1}</Text>
         </View>
         <IconContainer name={'message-text'} size={20} showBorder={false} />
-        <Text style={styles.roomName}>{room.name}</Text>
+        <Text numberOfLines={2} style={styles.roomName}>
+          {room.name}
+        </Text>
       </View>
       <IconContainer
         name={'chevron-right'}
@@ -52,12 +54,10 @@ export default RoomItem;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: verticalScale(50),
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: Colors.cardBackground,
-    paddingVertical: verticalScale(12),
     borderRadius: moderateScale(12),
     paddingRight: scale(16),
     borderWidth: moderateScale(1),
@@ -80,5 +80,7 @@ const styles = StyleSheet.create({
 
   roomName: {
     ...CommonStylesFn.text(4, Colors.white, Fonts.medium),
+    width: '60%',
+    flexWrap: 'wrap',
   },
 });

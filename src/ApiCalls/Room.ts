@@ -21,20 +21,26 @@ export const getRooms = async () => {
 };
 
 export const createRoom = async (name: string) => {
-  const response = await APICall<Room>({
-    method: 'post',
-    url: EndPoints.createRoom,
-    payload: {
-      name,
-    },
-  });
-  if (response.status === 200) {
-    showToast(ToastType.success, 'Room created successfully');
-    await getRooms();
-    await getStats();
-    return response.data;
-  } else {
-    showToast(ToastType.error, 'Error creating room');
+  try {
+    const response = await APICall<Room>({
+      method: 'post',
+      url: EndPoints.createRoom,
+      payload: {
+        name,
+      },
+    });
+    console.log(response, 'response');
+    if (response.status === 200) {
+      showToast(ToastType.success, 'Room created successfully');
+      await getRooms();
+      await getStats();
+      return response.data;
+    } else {
+      showToast(ToastType.error, 'Error creating room');
+      return null;
+    }
+  } catch (error: any) {
+    showToast(ToastType.error, error.data.detail);
     return null;
   }
 };
@@ -59,14 +65,17 @@ export const getStats = async () => {
   });
   if (response.status === 200) {
     store.dispatch(updateStats(response.data));
-    const tempRooms = response.data.active_rooms.map((room) => ({
-      ...room,
-      is_active: store
-        .getState()
-        .Rooms?.stats?.active_rooms?.map((item) => item.id)
-        .includes(room.id),
-    }));
-    store.dispatch(updateRooms(tempRooms));
+    const timeout = setTimeout(() => {
+      const tempRooms = response.data.active_rooms.map((room) => ({
+        ...room,
+        is_active: store
+          .getState()
+          .Rooms?.stats?.active_rooms?.map((item) => item.id)
+          .includes(room.id),
+      }));
+      store.dispatch(updateRooms(tempRooms));
+      clearTimeout(timeout);
+    }, 200);
     return response.data;
   } else {
     showToast(ToastType.error, 'Error fetching stats');

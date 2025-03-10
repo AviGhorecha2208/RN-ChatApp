@@ -1,4 +1,3 @@
-/* eslint-disable no-unsafe-finally */
 import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { AppConfig } from './AppConfig';
 import Loader from '../Utils/AppLoader';
@@ -19,14 +18,20 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   async (response) => {
-    console.log(`<= Response : ${response?.config?.url} : Status - ${response?.status} `, response);
+    console.log(
+      `<= Response : ${response?.config?.url} : Status - ${response?.status} `,
+      response.data,
+    );
     Loader.isLoading(false);
     return response;
   },
   async (error) => {
     try {
-      console.log(`<= Response : ${error?.config?.url} : Status - ${error?.status} `, error);
-      return Promise.reject(error);
+      console.log(
+        `<= Response Error : ${error?.config?.url} : Status - ${error?.status} `,
+        error.response,
+      );
+      throw error.response;
     } catch (err) {
       console.log('Error in axios interceptor response: ', err);
       return Promise.reject(err);
@@ -48,7 +53,6 @@ const APICall = async <T>({
   method = 'post',
   payload = null,
   url = '',
-  headers = {} as AxiosRequestHeaders,
   removeLoader = false,
 }: APICallParams): Promise<AxiosResponse<T>> => {
   if (!removeLoader) {
@@ -74,10 +78,14 @@ const APICall = async <T>({
   return new Promise((resolve, reject) => {
     axiosInstance(config)
       .then((res) => {
-        resolve(res);
+        if (res.status === 200) {
+          resolve(res);
+        } else {
+          reject(res);
+        }
       })
       .catch((error) => {
-        if (error.response) {
+        if (error) {
           reject(error);
         }
         reject({
