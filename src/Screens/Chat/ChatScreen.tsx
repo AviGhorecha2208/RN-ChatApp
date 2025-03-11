@@ -6,7 +6,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
   Keyboard,
 } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -24,6 +23,9 @@ import { moderateScale, scale, verticalScale } from '../../Utils/Responsive';
 import { pop } from '../../Navigation/NavigationServices';
 import { showToast } from '../../Utils/Utility';
 import { ToastType } from '../../Utils/Const';
+import CommonButton from '../../Components/CommonButton';
+import { CommonStylesFn } from '../../Utils/CommonStyles';
+import { Fonts } from '../../Utils/Fonts';
 
 const ChatScreen = () => {
   const route = useRoute();
@@ -31,9 +33,10 @@ const ChatScreen = () => {
   const { username } = useSelector((state: RootState) => state.Auth.userData);
   const [message, setMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [messagesFromSocket, setMessagesFromSocket] = useState<Message[]>([]);
 
-  // Listen to keyboard events
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
       setKeyboardVisible(true);
@@ -42,7 +45,6 @@ const ChatScreen = () => {
       setKeyboardVisible(false);
     });
 
-    // Cleanup listeners
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
@@ -55,6 +57,7 @@ const ChatScreen = () => {
     sendMessage,
     disconnect,
     reconnect,
+    gotError,
   } = useSocket(room.id, username);
 
   const fetchPreviousMessages = useCallback(async () => {
@@ -69,21 +72,24 @@ const ChatScreen = () => {
     fetchPreviousMessages();
   }, [fetchPreviousMessages]);
 
-  console.log(socketMessages, 'socketMessages');
-
   useEffect(() => {
+    // console.log(socketMessages, 'socketMessages');
     if (socketMessages.length > 0) {
-      setLocalMessages((prev) => [...prev, ...socketMessages]);
+      setMessagesFromSocket(socketMessages);
     }
   }, [socketMessages]);
 
   const handleSend = async () => {
     const messageToSend = message.trim();
     if (messageToSend && isConnected) {
-      const x = sendMessage(messageToSend);
-      console.log(x, 'x');
+      const result = sendMessage(messageToSend);
 
-      setMessage('');
+      if (result) {
+        setSentMessages((prev) => [...prev, result as Message]);
+        setMessage('');
+      } else {
+        showToast(ToastType.error, 'Failed to send message');
+      }
     } else if (!messageToSend) {
       showToast(ToastType.error, 'Please enter a message');
     } else if (!isConnected) {
@@ -96,17 +102,31 @@ const ChatScreen = () => {
     pop();
   };
 
-  if (!true) {
-    return (
-      <View style={styles.container}>
-        <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size={'large'} color={Colors.primary} />
-          <Text style={{ color: Colors.textSecondary }}>Connecting to chat...</Text>
-        </View>
-      </View>
-    );
-  }
+  // if (!isConnected) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
+  //       <View style={styles.loadingContainer}>
+  //         <ActivityIndicator
+  //           size={'large'}
+  //           color={Colors.primary}
+  //           style={styles.loadingIndicator}
+  //         />
+  //         <Text style={CommonStylesFn.text(4, Colors.white, Fonts.medium)}>
+  //           Connecting to chat...
+  //         </Text>
+  //       </View>
+
+  //     </View>
+  //   );
+  // }
+  console.log(localMessages, 'localMessages');
+  console.log(sentMessages, 'sentMessages');
+  console.log(socketMessages, 'socketMessages');
+  // Combine all messages for display
+  const allMessages = [...localMessages, ...messagesFromSocket].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 
   return (
     <KeyboardAvoidingView
@@ -116,16 +136,10 @@ const ChatScreen = () => {
         isKeyboardVisible ? (Platform.OS === 'ios' ? verticalScale(100) : verticalScale(60)) : 0
       }
     >
-      <CommonHeader
-        title={room.name}
-        leftIcon={'arrow-left'}
-        onLeftPress={handleLeftPress}
-        rightIcon={'refresh'}
-        onRightPress={reconnect}
-      />
+      <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
 
       <FlatList
-        data={localMessages}
+        data={allMessages}
         renderItem={({ item }) => <MessageItem item={item} />}
         keyExtractor={(item) => `${item.id}`}
         inverted
@@ -133,21 +147,40 @@ const ChatScreen = () => {
       />
 
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder={'Type a message...'}
-          value={message}
-          onChangeText={setMessage}
-          placeholderTextColor={Colors.white}
-          multiline
-        />
-        <IconContainer
-          name={'send'}
-          size={20}
-          onPress={handleSend}
-          backgroundColor={Colors.primary}
-          color={Colors.white}
-        />
+        {isConnected ? (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder={'Type a message...'}
+              value={message}
+              onChangeText={setMessage}
+              placeholderTextColor={Colors.white}
+              multiline
+            />
+            <IconContainer
+              name={'send'}
+              size={20}
+              onPress={handleSend}
+              backgroundColor={Colors.primary}
+              color={Colors.white}
+            />
+          </>
+        ) : gotError ? (
+          <CommonButton
+            label={'Reconnect'}
+            onPress={reconnect}
+            containerStyle={styles.reconnectButton}
+          />
+        ) : (
+          <Text
+            style={[
+              CommonStylesFn.text(3.5, Colors.white, Fonts.medium),
+              { paddingVertical: scale(12) },
+            ]}
+          >
+            Connecting to chat...
+          </Text>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -160,13 +193,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   inputContainer: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: scale(12),
     paddingVertical: verticalScale(12),
@@ -175,10 +204,14 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: Colors.white,
     paddingVertical: scale(12),
     paddingHorizontal: scale(16),
     borderRadius: moderateScale(20),
     backgroundColor: Colors.cardBackground,
+    ...CommonStylesFn.text(3.5, Colors.white, Fonts.medium),
+  },
+  reconnectButton: {
+    width: '50%',
+    alignSelf: 'center',
   },
 });
