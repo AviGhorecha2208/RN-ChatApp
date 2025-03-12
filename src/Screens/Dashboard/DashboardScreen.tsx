@@ -15,6 +15,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utility } from '../../Utils/Utility';
 import ConfirmationModal from '../../Components/Modals/ConfirmationModal';
 import EmptyComponent from '../../Components/EmptyComponent';
+import { Room } from '../../Interfaces/Network';
+
+const ITEMS_PER_PAGE = 20;
 
 const DashboardScreen = () => {
   const { username } = useSelector((state: RootState) => state.Auth.userData);
@@ -24,15 +27,18 @@ const DashboardScreen = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedRooms, setSearchedRooms] = useState(active_rooms);
   const [showModal, setShowModal] = useState(false);
+  const [displayedRooms, setDisplayedRooms] = useState<Room[]>([]);
 
   useEffect(() => {
-    getStats();
-    getRooms();
+    getRooms().then(() => {
+      getStats();
+    });
   }, []);
 
   useEffect(() => {
     setSearchedRooms(rooms);
     setSearchText('');
+    setDisplayedRooms(rooms?.slice(0, ITEMS_PER_PAGE) || []);
   }, [rooms]);
 
   const handleCreateRoom = () => {
@@ -52,10 +58,22 @@ const DashboardScreen = () => {
     setSearchText(text);
     if (text.trim() === '') {
       setSearchedRooms(rooms);
+      setDisplayedRooms(rooms?.slice(0, ITEMS_PER_PAGE) || []);
     } else {
-      setSearchedRooms(
-        rooms?.filter((room) => room.name?.toLowerCase().includes(text?.toLowerCase())),
+      const filteredRooms = rooms?.filter((room) =>
+        room.name?.toLowerCase().includes(text?.toLowerCase()),
       );
+      setSearchedRooms(filteredRooms);
+      setDisplayedRooms(filteredRooms?.slice(0, ITEMS_PER_PAGE) || []);
+    }
+  };
+
+  const loadMoreRooms = () => {
+    const currentLength = displayedRooms.length;
+    const nextBatch = searchedRooms?.slice(currentLength, currentLength + ITEMS_PER_PAGE) || [];
+
+    if (nextBatch.length > 0) {
+      setDisplayedRooms((prev) => [...prev, ...nextBatch]);
     }
   };
 
@@ -90,13 +108,15 @@ const DashboardScreen = () => {
           />
         </View>
         <FlatList
-          data={searchedRooms}
+          data={displayedRooms}
           renderItem={({ item, index }) => <RoomItem room={item} index={index} />}
           keyExtractor={(item) => `room-${item.id}`}
           contentContainerStyle={styles.flContent}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           refreshControl={<RefreshControl refreshing={false} onRefresh={handleRefresh} />}
           ListEmptyComponent={EmptyComponent}
+          onEndReached={loadMoreRooms}
+          onEndReachedThreshold={0.1}
         />
       </View>
       <ConfirmationModal
@@ -118,6 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   subContainer: {
+    flex: 1, // Changed to flex: 1 to ensure it takes available space
     paddingHorizontal: scale(16),
   },
   flContent: {
@@ -132,7 +153,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -18,9 +18,8 @@ export const getPreviousMessages = async (roomId: number) => {
       method: 'get',
       url: `${EndPoints.getRooms}/${roomId}/messages`,
     });
-    console.log('getPreviousMessages response', response);
     if (response.status === 200) {
-      return response.data;
+      return response.data.slice(0, 10);
     } else {
       showToast(ToastType.error, 'Error fetching previous messages');
       return null;

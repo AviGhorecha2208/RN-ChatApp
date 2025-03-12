@@ -45,6 +45,7 @@ export interface Message {
   content: string;
   created_at: string;
   id: number;
+  color?: string;
   room_id: string;
   user_id: number | string;
   username: string;

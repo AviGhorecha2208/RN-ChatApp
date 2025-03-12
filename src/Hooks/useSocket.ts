@@ -115,6 +115,6 @@ export const useSocket = (roomId: number, username: string) => {
     messages,
     sendMessage,
     disconnect: cleanupSocket,
-    reconnect: connect,
+    connect,
   };
 };

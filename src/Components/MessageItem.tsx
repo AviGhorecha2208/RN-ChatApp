@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Message } from '../Interfaces/Network';
 import { Colors } from '../Utils/Colors';
 import { CommonStylesFn } from '../Utils/CommonStyles';
@@ -18,39 +18,18 @@ const MessageItem = ({ item }: MessageItemProps) => {
   const isCurrentUser = item.username === username;
 
   const formatMessageTime = (timestamp: string) => {
-    return moment(timestamp).format('HH:mm');
+    return moment(timestamp).format('hh:mm a');
   };
 
   return (
     <View style={[styles.container, isCurrentUser ? styles.rightContainer : styles.leftContainer]}>
       {!isCurrentUser && (
-        <Text style={[CommonStylesFn.text(3, Colors.textSecondary, Fonts.medium)]}>
-          {item.username}
+        <Text style={[CommonStylesFn.text(3, item?.color ?? Colors.textSecondary, Fonts.medium)]}>
+          {item?.username}
         </Text>
       )}
-      <View
-        style={[styles.messageContainer, isCurrentUser ? styles.rightMessage : styles.leftMessage]}
-      >
-        <Text
-          style={[
-            CommonStylesFn.text(
-              3.5,
-              isCurrentUser ? Colors.white : Colors.textPrimary,
-              Fonts.regular,
-            ),
-          ]}
-        >
-          {item.content}
-        </Text>
-      </View>
-      <Text
-        style={[
-          CommonStylesFn.text(2.5, Colors.textSecondary, Fonts.regular),
-          isCurrentUser ? styles.rightTime : styles.leftTime,
-        ]}
-      >
-        {formatMessageTime(item.created_at)}
-      </Text>
+      <Text style={styles.message}>{item?.content}</Text>
+      <Text style={styles.time}>{formatMessageTime(item?.created_at)}</Text>
     </View>
   );
 };
@@ -61,35 +40,26 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: verticalScale(4),
     maxWidth: '80%',
+    backgroundColor: Colors.borderColor,
+    borderRadius: moderateScale(16),
+    marginHorizontal: scale(10),
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(4),
   },
   leftContainer: {
     alignSelf: 'flex-start',
-    marginLeft: scale(8),
   },
   rightContainer: {
     alignSelf: 'flex-end',
-    marginRight: scale(8),
-  },
-  messageContainer: {
-    padding: moderateScale(12),
-    borderRadius: moderateScale(16),
-    marginTop: verticalScale(4),
-  },
-  leftMessage: {
-    backgroundColor: Colors.cardBackground,
-    borderTopLeftRadius: moderateScale(4),
-  },
-  rightMessage: {
     backgroundColor: Colors.primary,
-    borderTopRightRadius: moderateScale(4),
   },
-  leftTime: {
-    marginLeft: scale(4),
-    marginTop: verticalScale(4),
+  message: {
+    marginVertical: verticalScale(8),
+    ...CommonStylesFn.text(3.75, Colors.white, Fonts.regular),
   },
-  rightTime: {
-    marginRight: scale(4),
-    marginTop: verticalScale(4),
-    textAlign: 'right',
+  time: {
+    width: '100%',
+    alignSelf: 'flex-end',
+    ...CommonStylesFn.text(2.5, Colors.textPrimary, Fonts.regular),
   },
 });

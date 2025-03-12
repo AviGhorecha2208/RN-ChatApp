@@ -8,7 +8,7 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Colors } from '../../Utils/Colors';
 import CommonHeader from '../../Components/CommonHeader';
 import IconContainer from '../../Components/IconContainer';
@@ -33,9 +33,9 @@ const ChatScreen = () => {
   const { username } = useSelector((state: RootState) => state.Auth.userData);
   const [message, setMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
-  const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [messagesFromSocket, setMessagesFromSocket] = useState<Message[]>([]);
+  const userColors = useRef<{ [key: string]: string }>({});
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -56,14 +56,13 @@ const ChatScreen = () => {
     messages: socketMessages,
     sendMessage,
     disconnect,
-    reconnect,
+    connect,
     gotError,
   } = useSocket(room.id, username);
 
   const fetchPreviousMessages = useCallback(async () => {
     const messages = await getPreviousMessages(room.id);
     if (messages) {
-      console.log(messages, 'messages');
       setLocalMessages(messages);
     }
   }, [room.id]);
@@ -82,14 +81,8 @@ const ChatScreen = () => {
   const handleSend = async () => {
     const messageToSend = message.trim();
     if (messageToSend && isConnected) {
-      const result = sendMessage(messageToSend);
-
-      if (result) {
-        setSentMessages((prev) => [...prev, result as Message]);
-        setMessage('');
-      } else {
-        showToast(ToastType.error, 'Failed to send message');
-      }
+      sendMessage(messageToSend);
+      setMessage('');
     } else if (!messageToSend) {
       showToast(ToastType.error, 'Please enter a message');
     } else if (!isConnected) {
@@ -102,31 +95,23 @@ const ChatScreen = () => {
     pop();
   };
 
-  // if (!isConnected) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
-  //       <View style={styles.loadingContainer}>
-  //         <ActivityIndicator
-  //           size={'large'}
-  //           color={Colors.primary}
-  //           style={styles.loadingIndicator}
-  //         />
-  //         <Text style={CommonStylesFn.text(4, Colors.white, Fonts.medium)}>
-  //           Connecting to chat...
-  //         </Text>
-  //       </View>
-
-  //     </View>
-  //   );
-  // }
-  console.log(localMessages, 'localMessages');
-  console.log(sentMessages, 'sentMessages');
-  console.log(socketMessages, 'socketMessages');
-  // Combine all messages for display
   const allMessages = [...localMessages, ...messagesFromSocket].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+
+  const coloredMessages = allMessages.map((messageItem) => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 70 + Math.random() * 30;
+    const lightness = 45 + Math.random() * 15;
+    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    if (!userColors.current[messageItem.username]) {
+      userColors.current[messageItem.username] = color;
+    }
+    return {
+      ...messageItem,
+      color: userColors.current[messageItem.username],
+    };
+  });
 
   return (
     <KeyboardAvoidingView
@@ -139,10 +124,11 @@ const ChatScreen = () => {
       <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
 
       <FlatList
-        data={allMessages}
+        data={coloredMessages}
         renderItem={({ item }) => <MessageItem item={item} />}
         keyExtractor={(item) => `${item.id}`}
         inverted
+        contentContainerStyle={{ paddingVertical: verticalScale(10) }}
         showsVerticalScrollIndicator={false}
       />
 
@@ -168,7 +154,7 @@ const ChatScreen = () => {
         ) : gotError ? (
           <CommonButton
             label={'Reconnect'}
-            onPress={reconnect}
+            onPress={connect}
             containerStyle={styles.reconnectButton}
           />
         ) : (
@@ -178,7 +164,7 @@ const ChatScreen = () => {
               { paddingVertical: scale(12) },
             ]}
           >
-            Connecting to chat...
+            {'Connecting to chat...'}
           </Text>
         )}
       </View>
