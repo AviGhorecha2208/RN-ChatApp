@@ -90,6 +90,9 @@ export const useSocket = (roomId: number, username: string) => {
           } else {
             showToast(ToastType.info, `${data.username} joined the room`);
           }
+        } else if (data.event === 'leave') {
+          setConnectedUsers(data.users || []);
+          showToast(ToastType.info, `${data.username} left the room`);
         } else if (data.event === 'message') {
           setMessages((prev) => {
             if (prev.some((msg) => msg?.id === data?.message?.id)) {
