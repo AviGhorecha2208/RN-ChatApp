@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Room, StatsResponse } from '../Interfaces/Network';
+import { Room, StatsPayload } from '../Interfaces/Network';
 import { revertAll } from './RevertAll';
 
 const initialState: {
   rooms: Room[];
-  stats: StatsResponse;
+  stats: StatsPayload;
 } = {
   rooms: [],
   stats: {
@@ -26,7 +26,7 @@ export const roomsSlice = createSlice({
     updateRooms: (state, action: PayloadAction<Room[]>) => {
       state.rooms = action.payload;
     },
-    updateStats: (state, action: PayloadAction<StatsResponse>) => {
+    updateStats: (state, action: PayloadAction<StatsPayload>) => {
       state.stats = action.payload;
     },
   },

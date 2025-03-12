@@ -4,7 +4,7 @@ import { EndPoints } from '../Network/EndPoints';
 import { updateRooms, updateStats } from '../Store/Rooms';
 import { store } from '../Store/Store';
 import { ToastType } from '../Utils/Const';
-import { showToast } from '../Utils/Utility';
+import { showToast, Utility } from '../Utils/Utility';
 
 export const getRooms = async () => {
   const response = await APICall<Room[]>({
@@ -64,7 +64,15 @@ export const getStats = async () => {
     url: EndPoints.getStats,
   });
   if (response.status === 200) {
-    store.dispatch(updateStats(response.data));
+    store.dispatch(
+      updateStats({
+        ...response.data,
+        active_users: response.data.active_users?.map((user) => ({
+          username: user,
+          color: Utility.getRandomColor(),
+        })),
+      }),
+    );
     const timeout = setTimeout(() => {
       const tempRooms = response.data.active_rooms.map((room) => ({
         ...room,

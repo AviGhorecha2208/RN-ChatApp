@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Message } from '../Interfaces/Network';
+import { showToast } from '../Utils/Utility';
+import { ToastType } from '../Utils/Const';
 
 export interface SocketMessageEvent {
   id: string;
@@ -16,6 +18,7 @@ export const useSocket = (roomId: number, username: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [gotError, setGotError] = useState(false);
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -55,6 +58,14 @@ export const useSocket = (roomId: number, username: string) => {
     socket.onclose = (event) => {
       console.log(`Closed for room ${roomId}. Code: ${event.code}, Reason: ${event.reason}`);
       setIsConnected(false);
+
+      if (event.code === 1000) {
+        console.log('Normal closure, not attempting to reconnect');
+        showToast(ToastType.info, 'Room Disconnected');
+        reconnectAttemptsRef.current = MAX_RECONNECT_ATTEMPTS;
+        return;
+      }
+
       if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
         reconnectAttemptsRef.current++;
         const delay = reconnectAttemptsRef.current * 1000;
@@ -72,10 +83,18 @@ export const useSocket = (roomId: number, username: string) => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.event === 'ping') return;
-        if (data.event === 'message') {
+        setConnectedUsers(data.users || []);
+        if (data.event === 'join') {
+          if (data.username === username) {
+            showToast(ToastType.success, 'You joined the room');
+          } else {
+            showToast(ToastType.info, `${data.username} joined the room`);
+          }
+        } else if (data.event === 'message') {
           setMessages((prev) => {
-            if (prev.some((msg) => msg.id === data.message.id)) return prev;
+            if (prev.some((msg) => msg?.id === data?.message?.id)) {
+              return prev;
+            }
             return [...prev, data.message];
           });
         }
@@ -83,7 +102,7 @@ export const useSocket = (roomId: number, username: string) => {
         console.error('Error parsing message:', error);
       }
     };
-  }, [wsUrl, roomId, cleanupSocket]);
+  }, [wsUrl, roomId, cleanupSocket, username]);
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -116,5 +135,6 @@ export const useSocket = (roomId: number, username: string) => {
     sendMessage,
     disconnect: cleanupSocket,
     connect,
+    connectedUsers,
   };
 };

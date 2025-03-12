@@ -8,7 +8,7 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Colors } from '../../Utils/Colors';
 import CommonHeader from '../../Components/CommonHeader';
 import IconContainer from '../../Components/IconContainer';
@@ -31,12 +31,11 @@ const ChatScreen = () => {
   const route = useRoute();
   const { room } = route.params as { room: Room };
   const { username } = useSelector((state: RootState) => state.Auth.userData);
+  const { active_users } = useSelector((state: RootState) => state.Rooms.stats);
   const [message, setMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [messagesFromSocket, setMessagesFromSocket] = useState<Message[]>([]);
-  const userColors = useRef<{ [key: string]: string }>({});
-
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
       setKeyboardVisible(true);
@@ -58,6 +57,7 @@ const ChatScreen = () => {
     disconnect,
     connect,
     gotError,
+    connectedUsers,
   } = useSocket(room.id, username);
 
   const fetchPreviousMessages = useCallback(async () => {
@@ -72,7 +72,6 @@ const ChatScreen = () => {
   }, [fetchPreviousMessages]);
 
   useEffect(() => {
-    // console.log(socketMessages, 'socketMessages');
     if (socketMessages.length > 0) {
       setMessagesFromSocket(socketMessages);
     }
@@ -100,16 +99,10 @@ const ChatScreen = () => {
   );
 
   const coloredMessages = allMessages.map((messageItem) => {
-    const hue = Math.floor(Math.random() * 360);
-    const saturation = 70 + Math.random() * 30;
-    const lightness = 45 + Math.random() * 15;
-    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    if (!userColors.current[messageItem.username]) {
-      userColors.current[messageItem.username] = color;
-    }
+    const user = active_users.find((userItem) => userItem.username === messageItem.username);
     return {
       ...messageItem,
-      color: userColors.current[messageItem.username],
+      color: user?.color,
     };
   });
 
@@ -122,7 +115,26 @@ const ChatScreen = () => {
       }
     >
       <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
-
+      <FlatList
+        data={connectedUsers.filter((user) => user !== username)}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const user = active_users.find((userItem) => userItem.username === item);
+          return (
+            <View style={styles.userContainer}>
+              <Text style={CommonStylesFn.text(3.5, user?.color ?? Colors.white, Fonts.medium)}>
+                {item}
+              </Text>
+            </View>
+          );
+        }}
+        ListHeaderComponent={
+          <Text style={CommonStylesFn.text(3.5, Colors.white, Fonts.medium)}>Connected Users</Text>
+        }
+        contentContainerStyle={styles.flContainer}
+        keyExtractor={(item) => JSON.stringify(item)}
+      />
       <FlatList
         data={coloredMessages}
         renderItem={({ item }) => <MessageItem item={item} />}
@@ -158,14 +170,7 @@ const ChatScreen = () => {
             containerStyle={styles.reconnectButton}
           />
         ) : (
-          <Text
-            style={[
-              CommonStylesFn.text(3.5, Colors.white, Fonts.medium),
-              { paddingVertical: scale(12) },
-            ]}
-          >
-            {'Connecting to chat...'}
-          </Text>
+          <Text style={styles.connectingText}>{'Connecting to chat...'}</Text>
         )}
       </View>
     </KeyboardAvoidingView>
@@ -188,6 +193,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderColor,
     gap: scale(12),
   },
+  userContainer: {
+    backgroundColor: Colors.borderColor,
+    paddingHorizontal: scale(12),
+    borderRadius: moderateScale(10),
+    height: verticalScale(30),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flContainer: {
+    paddingHorizontal: scale(12),
+    alignItems: 'center',
+    gap: scale(12),
+    marginVertical: verticalScale(12),
+  },
   input: {
     flex: 1,
     paddingVertical: scale(12),
@@ -195,6 +214,10 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20),
     backgroundColor: Colors.cardBackground,
     ...CommonStylesFn.text(3.5, Colors.white, Fonts.medium),
+  },
+  connectingText: {
+    ...CommonStylesFn.text(3.5, Colors.white, Fonts.medium),
+    paddingVertical: verticalScale(12),
   },
   reconnectButton: {
     width: '50%',

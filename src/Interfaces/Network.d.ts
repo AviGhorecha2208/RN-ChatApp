@@ -41,6 +41,13 @@ export interface StatsResponse {
   active_users: string[];
 }
 
+export interface StatsPayload {
+  total_rooms: number;
+  total_users: number;
+  active_rooms: Room[];
+  active_users: { username: string; color: string }[];
+}
+
 export interface Message {
   content: string;
   created_at: string;

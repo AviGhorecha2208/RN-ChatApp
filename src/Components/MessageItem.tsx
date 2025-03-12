@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Message } from '../Interfaces/Network';
 import { Colors } from '../Utils/Colors';
 import { CommonStylesFn } from '../Utils/CommonStyles';

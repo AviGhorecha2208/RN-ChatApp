@@ -46,7 +46,7 @@ export const toastConfig = {
     <BaseToast
       {...props}
       text2NumberOfLines={2}
-      style={{ borderLeftColor: Colors.black, height: verticalScale(70) }}
+      style={{ borderLeftColor: Colors.info, height: verticalScale(70) }}
       contentContainerStyle={{ paddingHorizontal: scale(10) }}
       text1Style={[
         CommonStylesFn.text(3, Colors.black, Fonts.medium),
@@ -141,6 +141,13 @@ const logout = () => {
   store.dispatch(revertAll());
 };
 
+const getRandomColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 70 + Math.random() * 30;
+  const lightness = 45 + Math.random() * 15;
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
 export const Utility = {
   toastConfig,
   showToast,
@@ -150,5 +157,6 @@ export const Utility = {
   formatCurrency,
   isEmailValid,
   isPhoneNumberValid,
+  getRandomColor,
   logout,
 };
