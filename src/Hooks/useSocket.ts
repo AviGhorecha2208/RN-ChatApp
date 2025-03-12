@@ -83,8 +83,8 @@ export const useSocket = (roomId: number, username: string) => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setConnectedUsers(data.users || []);
         if (data.event === 'join') {
+          setConnectedUsers(data.users || []);
           if (data.username === username) {
             showToast(ToastType.success, 'You joined the room');
           } else {
