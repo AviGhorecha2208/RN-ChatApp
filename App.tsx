@@ -15,6 +15,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 LogBox.ignoreAllLogs();
 
+if (!__DEV__) {
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
+
 const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>

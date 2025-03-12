@@ -116,7 +116,7 @@ const ChatScreen = () => {
     >
       <CommonHeader title={room.name} leftIcon={'arrow-left'} onLeftPress={handleLeftPress} />
       <FlatList
-        data={connectedUsers.filter((user) => user !== username)}
+        data={connectedUsers}
         horizontal
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -124,7 +124,7 @@ const ChatScreen = () => {
           return (
             <View style={styles.userContainer}>
               <Text style={CommonStylesFn.text(3.5, user?.color ?? Colors.white, Fonts.medium)}>
-                {item}
+                {item === username ? 'You' : item}
               </Text>
             </View>
           );
@@ -197,11 +197,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderColor,
     paddingHorizontal: scale(12),
     borderRadius: moderateScale(10),
-    height: verticalScale(30),
     justifyContent: 'center',
     alignItems: 'center',
   },
   flContainer: {
+    height: verticalScale(30),
     paddingHorizontal: scale(12),
     alignItems: 'center',
     gap: scale(12),

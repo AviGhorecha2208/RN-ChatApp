@@ -3,6 +3,7 @@ import APICall from '../Network/ApiCall';
 import { EndPoints } from '../Network/EndPoints';
 import { updateRooms, updateStats } from '../Store/Rooms';
 import { store } from '../Store/Store';
+import { Colors } from '../Utils/Colors';
 import { ToastType } from '../Utils/Const';
 import { showToast, Utility } from '../Utils/Utility';
 
@@ -69,7 +70,10 @@ export const getStats = async () => {
         ...response.data,
         active_users: response.data.active_users?.map((user) => ({
           username: user,
-          color: Utility.getRandomColor(),
+          color:
+            user === store.getState().Auth?.userData?.username
+              ? Colors.primary
+              : Utility.getRandomColor(),
         })),
       }),
     );

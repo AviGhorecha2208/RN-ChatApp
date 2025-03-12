@@ -14,10 +14,6 @@ A modern and feature-rich chat application built with React Native, supporting b
 - TypeScript support
 - Safe area handling
 
-## 📱 Screenshots
-
-[Add your app screenshots here]
-
 ## 🛠️ Technologies
 
 - React Native 0.78.0
