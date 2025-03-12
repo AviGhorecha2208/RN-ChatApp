@@ -1,8 +1,8 @@
 export const Fonts = {
-  light: 'Poppins-Light',
-  regular: 'Poppins-Regular',
-  medium: 'Poppins-Medium',
-  semiBold: 'Poppins-SemiBold',
-  bold: 'Poppins-Bold',
-  extraBold: 'Poppins-ExtraBold',
+  light: 'GoogleSans-Light',
+  regular: 'GoogleSans-Regular',
+  medium: 'GoogleSans-Medium',
+  bold: 'GoogleSans-Bold',
+  italic: 'GoogleSans-Italic',
+  extraBold: 'GoogleSans-ExtraBold',
 };

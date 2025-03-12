@@ -6,7 +6,10 @@ import { CommonStylesFn } from './CommonStyles';
 import { Platform } from 'react-native';
 import { ErrorWithMessage } from '../Interfaces/Network';
 import moment from 'moment';
-import { ToastType } from './Const';
+import { Screens, ToastType } from './Const';
+import { reset } from '../Navigation/NavigationServices';
+import { store } from '../Store/Store';
+import { revertAll } from '../Store/RevertAll';
 
 export const toastConfig = {
   success: (props: BaseToastProps) => (
@@ -43,7 +46,7 @@ export const toastConfig = {
     <BaseToast
       {...props}
       text2NumberOfLines={2}
-      style={{ borderLeftColor: Colors.black, height: verticalScale(70) }}
+      style={{ borderLeftColor: Colors.info, height: verticalScale(70) }}
       contentContainerStyle={{ paddingHorizontal: scale(10) }}
       text1Style={[
         CommonStylesFn.text(3, Colors.black, Fonts.medium),
@@ -130,6 +133,21 @@ const formatCurrency = (amount: string): string => {
   }).format(numAmount);
 };
 
+const logout = () => {
+  reset({
+    index: 0,
+    routes: [{ name: Screens.RegisterUser }],
+  });
+  store.dispatch(revertAll());
+};
+
+const getRandomColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 70 + Math.random() * 30;
+  const lightness = 45 + Math.random() * 15;
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
 export const Utility = {
   toastConfig,
   showToast,
@@ -139,4 +157,6 @@ export const Utility = {
   formatCurrency,
   isEmailValid,
   isPhoneNumberValid,
+  getRandomColor,
+  logout,
 };

@@ -2,6 +2,7 @@ import { Tuple, combineReducers, configureStore } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { persistReducer, persistStore } from 'redux-persist';
 import Auth from './Auth';
+import Rooms from './Rooms';
 import { MMKVStorage } from './MmkvStorage';
 
 const persistConfig = {
@@ -12,6 +13,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   Auth,
+  Rooms,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

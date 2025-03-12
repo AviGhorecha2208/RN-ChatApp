@@ -1,41 +1,30 @@
 export const Colors = {
   // Primary colors
-  primary: '#0084FF', // Neon blue for key interactive elements
+  primary: '#0084FF',
   primaryLight: '#009AFF',
   primaryDark: '#0066CC',
 
-  // Secondary colors
-  secondary: '#00D166', // Vibrant green for online indicators, success states
-  secondaryLight: '#00E676',
-  secondaryDark: '#009C4E',
-
   // Accent colors
-  accent: '#FFBB00', // Neon yellow for highlights, warnings
+  accent: '#FFBB00',
   accentLight: '#FFD700',
   accentDark: '#B38600',
 
-  // Chat-specific colors
-  sentMessage: '#0056CC', // Deep blue for sent messages
-  receivedMessage: '#0A0A0A', // Near-black for received messages
-  sentMessageText: '#FFFFFF',
-  receivedMessageText: '#C0C0C0',
-
   // Background & Surface
-  background: '#000000', // True black background for OLED efficiency
-  surface: '#0D0D0D', // Very dark gray for subtle contrast
+  background: '#000000',
+  surface: '#0D0D0D',
   cardBackground: '#121212',
-  borderColor: '#1A1A1A',
+  borderColor: '#2A2A2A',
 
   // Text colors
-  textPrimary: '#EAEAEA', // Soft white for smooth readability
-  textSecondary: '#A8A8A8', // Muted gray for less important text
-  textMuted: '#707070', // Even darker gray for placeholders
+  textPrimary: '#EAEAEA',
+  textSecondary: '#A8A8A8',
+  textMuted: '#707070',
 
   // Semantic colors
-  success: '#00D166', // Bright green success
-  info: '#009AFF', // Bright blue info
-  warning: '#FFBB00', // Neon yellow warning
-  danger: '#FF3B30', // Bright red for errors
+  success: '#00D166',
+  info: '#009AFF',
+  warning: '#FFBB00',
+  danger: '#FF3B30',
 
   // Neutral colors
   white: '#FFFFFF',
@@ -49,16 +38,6 @@ export const Colors = {
   gray800: '#101010',
   gray900: '#080808',
   black: '#000000',
-
-  // Component-specific colors
-  loaderColor: '#0084FF',
-  headerActiveColor: '#0084FF',
-
-  // Button colors
-  buttonColor: '#0084FF',
-  buttonColorHover: '#0066CC',
-  confirmButtonColor: '#00D166',
-  cancelButtonColor: '#FF3B30',
 
   // Overlays
   overlayBlack10: 'rgba(255, 255, 255, 0.1)',
@@ -78,4 +57,5 @@ export const Colors = {
   cancelled: '#FF3B30',
   delivered: '#00D166',
   orange: '#FF8000',
+  red: '#FF3B30',
 };

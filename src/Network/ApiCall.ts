@@ -1,6 +1,6 @@
 import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { AppConfig } from './AppConfig';
-import { getAccessToken } from '../Utils/Getters';
+import Loader from '../Utils/AppLoader';
 
 const axiosInstance = Axios.create({
   baseURL: AppConfig.baseUrl,
@@ -8,8 +8,6 @@ const axiosInstance = Axios.create({
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const accessToken = getAccessToken();
-    config.headers.set('Authorization', `Bearer ${accessToken}`);
     console.log(`axios request : ${config?.url} =>`, config);
     return config;
   },
@@ -20,12 +18,26 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   async (response) => {
-    console.log(`<= Response : ${response?.config?.url} : Status - ${response?.status} `, response);
+    console.log(
+      `<= Response : ${response?.config?.url} : Status - ${response?.status} `,
+      response.data,
+    );
+    Loader.isLoading(false);
     return response;
   },
   async (error) => {
-    console.log(`<= Response Error : ${error?.config?.url} : Status - ${error?.status} `, error);
-    return Promise.reject(error);
+    try {
+      console.log(
+        `<= Response Error : ${error?.config?.url} : Status - ${error?.status} `,
+        error.response,
+      );
+      throw error.response;
+    } catch (err) {
+      console.log('Error in axios interceptor response: ', err);
+      return Promise.reject(err);
+    } finally {
+      Loader.isLoading(false);
+    }
   },
 );
 
@@ -34,17 +46,19 @@ export interface APICallParams {
   payload?: any;
   url: string;
   headers?: AxiosRequestHeaders;
-  formData?: boolean;
   removeLoader?: boolean;
-  removeToken?: boolean;
-  updatedToken?: string;
 }
 
 const APICall = async <T>({
   method = 'post',
   payload = null,
   url = '',
+  removeLoader = false,
 }: APICallParams): Promise<AxiosResponse<T>> => {
+  if (!removeLoader) {
+    Loader.isLoading(true);
+  }
+
   const config: AxiosRequestConfig = {
     method: method.toLowerCase(),
     timeout: 1000 * 60 * 2,
@@ -59,23 +73,19 @@ const APICall = async <T>({
   } else if (payload && method.toLowerCase() === 'post') {
     config.data = payload;
   }
+  console.log('API details: ', method, payload, url);
 
   return new Promise((resolve, reject) => {
     axiosInstance(config)
       .then((res) => {
-        resolve(res);
+        if (res.status === 200) {
+          resolve(res);
+        } else {
+          reject(res);
+        }
       })
       .catch((error) => {
-        if (error.response) {
-          if (error.response.data?.error) {
-            reject({
-              statusCode: error.response,
-              data: {
-                ...error.response.data,
-                message: error?.response?.data?.error,
-              },
-            });
-          }
+        if (error) {
           reject(error);
         }
         reject({
