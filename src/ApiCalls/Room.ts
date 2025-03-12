@@ -49,7 +49,7 @@ export const createRoom = async (name: string) => {
 export const getRoom = async (id: string) => {
   const response = await APICall<Room>({
     method: 'get',
-    url: EndPoints.getRoom.replace(':id', `${id}`),
+    url: EndPoints.getRoom + id,
   });
   if (response.status === 200) {
     return response.data;

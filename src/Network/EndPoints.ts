@@ -3,5 +3,5 @@ export const EndPoints = {
   getRooms: '/chat/rooms',
   createRoom: '/chat/rooms',
   getStats: '/stats',
-  getRoom: '/chat/rooms/:id',
+  getRoom: '/chat/rooms/',
 };
