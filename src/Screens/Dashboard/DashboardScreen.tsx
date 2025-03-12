@@ -124,7 +124,10 @@ const DashboardScreen = () => {
         setShowModal={setShowModal}
         title={'Logout'}
         subTitle={'Are you sure you want to logout?\n\nYour session will be terminated.'}
-        onPressPositive={Utility.logout}
+        onPressPositive={() => {
+          Utility.logout();
+          setShowModal(false);
+        }}
       />
     </View>
   );
